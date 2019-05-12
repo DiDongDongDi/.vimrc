@@ -29,6 +29,9 @@ Plugin 'VundleVim/Vundle.vim'
 " Plugin 'ascenator/L9', {'name': 'newL9'}
 
 Plugin 'Valloric/YouCompleteMe'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'scrooloose/nerdcommenter'
 
 " 你的所有插件需要在下面这行之前
 call vundle#end()            " 必须
@@ -55,14 +58,31 @@ let g:ycm_semantic_triggers =  {
 			\ 'c,cpp,python,java,go,erlang,perl': ['re!\w{2}'],
 			\ 'cs,lua,javascript': ['re!\w{2}'],
 			\ }
+" 设置终止匹配键
+let g:ycm_key_list_stop_completion = ['<Space>']
+
+" airline配置
+" smarter tab line
+let g:airline#extensions#tabline#enabled = 1
+" which path formatter
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+" 更换主题
+let g:airline_theme="durant"
+" 启用字体
+let g:airline_powerline_fonts = 1
+" 设置切换Buffer快捷键
+nnoremap <c-n> :bn<CR>
+nnoremap <c-p> :bp<CR>
+
+let g:NERDSpaceDelims=1     " 注释后面自动加空格"
+
+let g:airline#extensions#tabline#buffer_nr_show = 1
 
 set encoding=utf-8
 set fileencodings=utf-8,chinese
 set tabstop=4 "tab键空格数
 set cindent shiftwidth=4
 set backspace=indent,eol,start
-autocmd Filetype c set omnifunc=ccomplete#Complete
-autocmd Filetype cpp set omnifunc=cppcomplete#Complete
 set incsearch "输入搜索模式时，每输入一个字符，就自动跳到第一个匹配的结果
 set number "显示行号
 set display=lastline
@@ -100,23 +120,28 @@ map <F9> :YcmDiags<CR>
 " 鼠标设置
 set mouse=nvc
 
+" 光标移动
+inoremap <c-l> <RIGHT>
+inoremap <c-h> <LEFT>
+
 " 符号自动补全
 inoremap ( ()<Esc>i
 inoremap [ []<Esc>i
-inoremap { {<CR>}<Esc>O
-autocmd Syntax html,vim inoremap < <lt>><Esc>i| inoremap > <c-r>=ClosePair('>')<CR>
+inoremap < <lt>><esc>i
+inoremap { {}<Esc>i
 inoremap ) <c-r>=ClosePair(')')<CR>
 inoremap ] <c-r>=ClosePair(']')<CR>
-inoremap } <c-r>=CloseBracket()<CR>
+inoremap } <c-r>=ClosePair('}')<CR>
+inoremap > <c-r>=ClosePair('>')<CR>
 inoremap " <c-r>=QuoteDelim('"')<CR>
 inoremap ' <c-r>=QuoteDelim("'")<CR>
 
 function ClosePair(char)
- if getline('.')[col('.') - 1] == a:char
- return "\<Right>"
- else
- return a:char
- endif
+	if getline('.')[col('.') - 1] == a:char
+		return "\<Right>"
+	else
+		return a:char
+	endif
 endf
 
 function CloseBracket()
@@ -142,11 +167,13 @@ endf
 " insert模式下 Ctrl+d 删除整行
 inoremap <c-d> <esc>dd$i<right>
 " insert模式下 Ctrl+v 粘贴
-inoremap <c-v> <esc>Pi
+inoremap <c-v> <esc>pa
 " Ctrl+c 复制可视模式下选中的文本
 vnoremap <c-c> "+y<esc><esc>
 " insert模式下 Ctrl+u 撤销
 inoremap <c-u> <esc>ui
+" Ctrl+x 删除可视模式下选中的文本
+vnoremap <c-x> d<esc><esc>i
 
 " 设置leader键
 let mapleader = ";"
@@ -189,6 +216,9 @@ inoremap OF <end>
 inoremap [3~ <del>
 inoremap [2~ <ins>
 
+" 这个leader用于那些只对某类文件而设置的映射
+let maplocalleader = ','
+
 " 自动组命令
 augroup default_autogroup
 	autocmd!
@@ -200,18 +230,32 @@ autocmd FileType javascript nnoremap <buffer> <localleader>c I//<esc>
 autocmd FileType python nnoremap <buffer> <localleader>c I#<esc>
 autocmd FileType C nnoremap <buffer> <localleader>c I//<esc>
 autocmd FileType C++ nnoremap <buffer> <localleader>c I//<esc>
-autocmd FileType vimscript nnoremap <buffer> <localleader>c I"<esc>
+autocmd FileType vim nnoremap <buffer> <localleader>c I"<esc>
+
+" 代码补全
+autocmd Filetype c set omnifunc=ccomplete#Complete
+autocmd Filetype cpp set omnifunc=cppcomplete#Complete
 
 " 不同文件的缩写
-autocmd FileType python :iabbrev <buffer> iff if:<left>
-autocmd FileType javascript :iabbrev <buffer> iff if()<left>
-autocmd FileType C :iabbrev <buffer> iff if()<left>
-autocmd FileType C++ :iabbrev <buffer> iff if()<left>
+" autocmd FileType python :iabbrev <buffer> iff if:<left>
+" autocmd FileType javascript :iabbrev <buffer> iff if()<left>
+" autocmd FileType C :iabbrev <buffer> iff if()<left>
+" autocmd FileType C++ :iabbrev <buffer> iff if()<left>
+
+" 大括号自动分行
+autocmd BufWritePre,BufRead *.c :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
+autocmd BufWritePre,BufRead *.cpp :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
 
 augroup END
 
-" 这个leader用于那些只对某类文件而设置的映射
-let maplocalleader = ','
+" 大括号自动分行
+function BracketsEnter(char)
+	if getline('.')[col('.')-1] == a:char
+		return "\<Enter>\<Tab>\<Esc>mpa\<Enter>\<Esc>`pa" 
+	else
+		return "\<Enter>"
+	endif
+endf
 
 " 括号\引号等字符之间内容的删除d、修改c、复制y
 onoremap ( i(
@@ -229,3 +273,34 @@ augroup END
 
 " 开始时折叠所有
 set foldlevelstart=0
+
+" 显示
+echo "          ┌─┐       ┌─┐"
+echo "       ┌──┘ ┴───────┘ ┴──┐"
+echo "       │                 │"
+echo "       │       ───       │"
+echo "       │  ─┬┘       └┬─  │"
+echo "       │                 │"
+echo "       │       ─┴─       │"
+echo "       │                 │"
+echo "       └───┐         ┌───┘"
+echo "           │         │"
+echo "           │         │"
+echo "           │         │"
+echo "           │         └──────────────┐"
+echo "           │                        │"
+echo "           │                        ├─┐"
+echo "           │                        ┌─┘    "
+echo "           │                        │"
+echo "           └─┐  ┐  ┌───────┬──┐  ┌──┘         "
+echo "             │ ─┤ ─┤       │ ─┤ ─┤         "
+echo "             └──┴──┘       └──┴──┘ "
+echo "                    神兽保佑       "
+echo "                    永无BUG!       "
+
+" 移动到行首并开始编辑
+nnoremap H 0i
+" 移动到行尾并开始编辑
+nnoremap L $a
+
+
