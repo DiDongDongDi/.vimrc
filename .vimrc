@@ -32,6 +32,7 @@ Plugin 'Valloric/YouCompleteMe'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'scrooloose/nerdcommenter'
+Plugin 'ludovicchabant/vim-gutentags'
 
 " 你的所有插件需要在下面这行之前
 call vundle#end()            " 必须
@@ -71,8 +72,8 @@ let g:airline_theme="durant"
 " 启用字体
 let g:airline_powerline_fonts = 1
 " 设置切换Buffer快捷键
-nnoremap <c-n> :bn<CR>
-nnoremap <c-p> :bp<CR>
+nnoremap <c-n> :w<CR>:bn<CR>
+nnoremap <c-p> :w<CR>:bp<CR>
 
 let g:NERDSpaceDelims=1     " 注释后面自动加空格"
 
@@ -167,13 +168,13 @@ endf
 " insert模式下 Ctrl+d 删除整行
 inoremap <c-d> <esc>dd$i<right>
 " insert模式下 Ctrl+v 粘贴
-inoremap <c-v> <esc>pa
+inoremap <c-v> <esc>"+pa
 " Ctrl+c 复制可视模式下选中的文本
-vnoremap <c-c> "+y<esc><esc>
+vnoremap <c-c> "+y
 " insert模式下 Ctrl+u 撤销
 inoremap <c-u> <esc>ui
 " Ctrl+x 删除可视模式下选中的文本
-vnoremap <c-x> d<esc><esc>i
+vnoremap <c-x> "+d<esc><esc>i
 
 " 设置leader键
 let mapleader = ";"
@@ -246,6 +247,9 @@ autocmd Filetype cpp set omnifunc=cppcomplete#Complete
 autocmd BufWritePre,BufRead *.c :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
 autocmd BufWritePre,BufRead *.cpp :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
 
+" http缩写
+autocmd BufWritePre,BufRead *.md :iabbrev http http://pqcits4n2.bkt.clouddn.com/didong/images/
+
 augroup END
 
 " 大括号自动分行
@@ -275,32 +279,64 @@ augroup END
 set foldlevelstart=0
 
 " 显示
-echo "          ┌─┐       ┌─┐"
-echo "       ┌──┘ ┴───────┘ ┴──┐"
-echo "       │                 │"
-echo "       │       ───       │"
-echo "       │  ─┬┘       └┬─  │"
-echo "       │                 │"
-echo "       │       ─┴─       │"
-echo "       │                 │"
-echo "       └───┐         ┌───┘"
-echo "           │         │"
-echo "           │         │"
-echo "           │         │"
-echo "           │         └──────────────┐"
-echo "           │                        │"
-echo "           │                        ├─┐"
-echo "           │                        ┌─┘    "
-echo "           │                        │"
-echo "           └─┐  ┐  ┌───────┬──┐  ┌──┘         "
-echo "             │ ─┤ ─┤       │ ─┤ ─┤         "
-echo "             └──┴──┘       └──┴──┘ "
-echo "                    神兽保佑       "
-echo "                    永无BUG!       "
+" echo "          ┌─┐       ┌─┐"
+" echo "       ┌──┘ ┴───────┘ ┴──┐"
+" echo "       │                 │"
+" echo "       │       ───       │"
+" echo "       │  ─┬┘       └┬─  │"
+" echo "       │                 │"
+" echo "       │       ─┴─       │"
+" echo "       │                 │"
+" echo "       └───┐         ┌───┘"
+" echo "           │         │"
+" echo "           │         │"
+" echo "           │         │"
+" echo "           │         └──────────────┐"
+" echo "           │                        │"
+" echo "           │                        ├─┐"
+" echo "           │                        ┌─┘    "
+" echo "           │                        │"
+" echo "           └─┐  ┐  ┌───────┬──┐  ┌──┘         "
+" echo "             │ ─┤ ─┤       │ ─┤ ─┤         "
+" echo "             └──┴──┘       └──┴──┘ "
+" echo "                    神兽保佑       "
+" echo "                    永无BUG!       "
 
 " 移动到行首并开始编辑
 nnoremap H 0i
 " 移动到行尾并开始编辑
 nnoremap L $a
 
+" gvim字体大小
+set guifont=Monospace\ 15
 
+" gutentags配置
+" gutentags搜索工程目录的标志，碰到这些文件/目录名就停止向上一级目录递归 "
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
+
+" 所生成的数据文件的名称
+let g:gutentags_ctags_tagfile = '.tags'
+
+" 将自动生成的 tags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录 "
+let s:vim_tags = expand('~/.cache/tags')
+let g:gutentags_cache_dir = s:vim_tags
+" 检测 ~/.cache/tags 不存在就新建 "
+if !isdirectory(s:vim_tags)
+   silent! call mkdir(s:vim_tags, 'p')
+endif
+
+" 配置 ctags 的参数 "
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+p+l+x+c+d+e+f+g+m+n+s+t+u+v']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+p+l+x+c+d+e+f+g+m+n+s+t+u+v']
+
+" ctags查看不同的匹配
+nnoremap <leader>tl :tn<CR>
+nnoremap <leader>th :tp<CR>
+
+" 全选
+noremap <c-a> <esc>ggvG$
+
+" 改变方向键
+nnoremap j k
+nnoremap k j
