@@ -36,6 +36,11 @@ Plugin 'ludovicchabant/vim-gutentags'
 Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'kien/ctrlp.vim'
+Plugin 'ervandew/eclim'
+Plugin 'nathanaelkane/vim-indent-guides'
+Plugin 'ntpeters/vim-better-whitespace'
+Plugin 'szymonmaszke/vimpyter'
 
 " 你的所有插件需要在下面这行之前
 call vundle#end()            " 必须
@@ -54,7 +59,7 @@ filetype plugin indent on    " 必须 加载vim自带和插件相应的语法和
 
 " YCM配置
 " 寻找全局配置文件
-let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py'
+let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
 " 语法关键字补全
 let g:ycm_seed_identifiers_with_syntax = 1
 " 启用语义补全
@@ -64,6 +69,10 @@ let g:ycm_semantic_triggers =  {
 			\ }
 " 设置终止匹配键
 let g:ycm_key_list_stop_completion = ['<Space>']
+" 使用eclim的java语义补全
+let g:EclimCompletionMethod = 'omnifunc'
+" 关闭是否载入YCM配置文件提示
+let g:ycm_confirm_extra_conf = 0
 
 " airline配置
 " smarter tab line
@@ -131,12 +140,12 @@ inoremap <c-h> <LEFT>
 " 符号自动补全
 inoremap ( ()<Esc>i
 inoremap [ []<Esc>i
-inoremap < <lt>><esc>i
+" inoremap < <lt>><esc>i
 inoremap { {}<Esc>i
 inoremap ) <c-r>=ClosePair(')')<CR>
 inoremap ] <c-r>=ClosePair(']')<CR>
 inoremap } <c-r>=ClosePair('}')<CR>
-inoremap > <c-r>=ClosePair('>')<CR>
+" inoremap > <c-r>=ClosePair('>')<CR>
 inoremap " <c-r>=QuoteDelim('"')<CR>
 inoremap ' <c-r>=QuoteDelim("'")<CR>
 
@@ -175,7 +184,7 @@ inoremap <c-v> <esc>"+pa
 " Ctrl+c 复制可视模式下选中的文本
 vnoremap <c-c> "+y
 " insert模式下 Ctrl+u 撤销
-inoremap <c-u> <esc>ui
+" inoremap <c-u> <esc>ui
 " Ctrl+x 删除可视模式下选中的文本
 vnoremap <c-x> "+d<esc><esc>i
 
@@ -249,9 +258,13 @@ autocmd Filetype cpp set omnifunc=cppcomplete#Complete
 " 大括号自动分行
 autocmd BufWritePre,BufRead *.c :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
 autocmd BufWritePre,BufRead *.cpp :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
+autocmd BufWritePre,BufRead *.java :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
 
 " http缩写
-autocmd BufWritePre,BufRead *.md :iabbrev http http://pqcits4n2.bkt.clouddn.com/didong/images/
+autocmd BufWritePre,BufRead *.md :iabbrev http http://qiniu.wangqy.top/didong/images
+
+" ``
+autocmd BufWritePre,BufRead *.md :inoremap ` ``<left>
 
 augroup END
 
@@ -367,3 +380,39 @@ let g:NERDTreeIndicatorMapCustom = {
     \ "Clean"     : "✔︎",
     \ "Unknown"   : "?"
     \ }
+
+" ctrlp.vim配置
+let g:ctrlp_map = '<leader>p'
+let g:ctrlp_cmd = 'CtrlP'
+map <leader>f :CtrlPMRU<CR>
+let g:ctrlp_custom_ignore = {
+    \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+    \ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz|pyc)$',
+    \ }
+let g:ctrlp_working_path_mode=0
+let g:ctrlp_match_window_bottom=1
+let g:ctrlp_max_height=15
+let g:ctrlp_match_window_reversed=0
+let g:ctrlp_mruf_max=500
+let g:ctrlp_follow_symlinks=1
+
+" java代码编译执行
+autocmd BufNewFile,BufReadPre *.java nnoremap <leader>crr :w<cr>:!javac %<cr>:!java %:r<cr>
+autocmd BufNewFile,BufReadPre *.java nnoremap <leader>cra :w<cr>:!javac *.java<cr>:!java Main<cr>
+autocmd BufNewFile,BufReadPre *.java nnoremap <leader>crp :w<cr>:Java<cr>
+" c代码编译执行
+autocmd BufNewFile,BufReadPre *.c nnoremap <leader>cr :w<cr>:!gcc % -o %:r<cr>:!./%:r<cr>
+" shell代码执行
+autocmd BufNewFile,BufReadPre *.sh nnoremap <leader>cr :w<cr>:!source %<cr>
+
+" 窗口切换
+nnoremap <leader>w <c-w>
+
+" vim-indent-guides配置
+let g:indent_guides_enable_on_vim_startup = 0  " 默认关闭
+let g:indent_guides_guide_size            = 1  " 指定对齐线的尺寸
+let g:indent_guides_start_level 	  = 2  " 从第二层开始可视化显示缩进
+
+" vimpyter配置
+" autocmd Filetype ipynb VimpyterStartJupyter
+" autocmd Filetype ipynb VimpyterInsertPythonBlock
