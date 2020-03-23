@@ -41,6 +41,8 @@ Plugin 'ervandew/eclim'
 Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'ntpeters/vim-better-whitespace'
 Plugin 'szymonmaszke/vimpyter'
+Plugin 'jupyter-vim/jupyter-vim'
+Plugin 'ybian/smartim'
 
 " 你的所有插件需要在下面这行之前
 call vundle#end()            " 必须
@@ -237,6 +239,10 @@ augroup default_autogroup
 	autocmd!
 " 读写html文件时进行缩进处理
 autocmd BufWritePre,BufRead *.html :normal gg=G
+autocmd BufWritePre,BufRead *.html :inoremap < <lt>><esc>i
+autocmd BufWritePre,BufRead *.html :inoremap > <c-r>=ClosePair('>')<CR>
+autocmd BufWritePre,BufRead *.html :inoremap % %  %<esc><LEFT>i
+autocmd BufWritePre,BufRead *.html :inoremap <! <!--  --><LEFT><LEFT><LEFT><LEFT>
 
 " 不同文件的注释
 autocmd FileType javascript nnoremap <buffer> <localleader>c I//<esc>
@@ -259,6 +265,7 @@ autocmd Filetype cpp set omnifunc=cppcomplete#Complete
 autocmd BufWritePre,BufRead *.c :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
 autocmd BufWritePre,BufRead *.cpp :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
 autocmd BufWritePre,BufRead *.java :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
+autocmd BufWritePre,BufRead *.l :inoremap <Enter> <c-r>=BracketsEnter('}')<CR>
 
 " http缩写
 autocmd BufWritePre,BufRead *.md :iabbrev http http://qiniu.wangqy.top/didong/images
@@ -266,12 +273,15 @@ autocmd BufWritePre,BufRead *.md :iabbrev http http://qiniu.wangqy.top/didong/im
 " ``
 autocmd BufWritePre,BufRead *.md :inoremap ` ``<left>
 
+" 打开urdf文件自动设置tab键长度
+autocmd BufWritePre,BufRead *.urdf :set tabstop=2
+
 augroup END
 
 " 大括号自动分行
 function BracketsEnter(char)
 	if getline('.')[col('.')-1] == a:char
-		return "\<Enter>\<Tab>\<Esc>mpa\<Enter>\<Esc>`pa" 
+		return "\<Enter>\<Tab>\<Esc>mpa\<Enter>\<Esc>`pa"
 	else
 		return "\<Enter>"
 	endif
@@ -416,3 +426,9 @@ let g:indent_guides_start_level 	  = 2  " 从第二层开始可视化显示缩�
 " vimpyter配置
 " autocmd Filetype ipynb VimpyterStartJupyter
 " autocmd Filetype ipynb VimpyterInsertPythonBlock
+
+" smartim配置
+let g:smartim_debug = 1
+
+" 没有权限的情况下强制保存文件
+cmap w!! w !sudo tee > /dev/null %
