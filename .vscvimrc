@@ -3,3 +3,9 @@ inoremap jk <esc>
 
 " 全选
 noremap <c-a> <esc>ggvG$
+
+" leader键
+let mapleader = ";"
+
+" 注释代码
+noremap <leader>cc <c-/>
