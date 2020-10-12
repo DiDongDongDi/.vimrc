@@ -161,23 +161,23 @@ function ClosePair(char)
 endf
 
 function CloseBracket()
- if match(getline(line('.') + 1), '\s*}') < 0
- return "\<CR>}"
- else
- return "\<Esc>j0f}a"
- endif
+  if match(getline(line('.') + 1), '\s*}') < 0
+  return "\<CR>}"
+  else
+  return "\<Esc>j0f}a"
+  endif
 endf
 
 function QuoteDelim(char)
- let line = getline('.')
- let col = col('.')
- if line[col - 2] == "\\"
- return a:char
- elseif line[col - 1] == a:char
- return "\<Right>"
- else
- return a:char.a:char."\<Esc>i"
- endif
+  let line = getline('.')
+  let col = col('.')
+  if line[col - 2] == "\\"
+  return a:char
+  elseif line[col - 1] == a:char
+  return "\<Right>"
+  else
+  return a:char.a:char."\<Esc>i"
+  endif
 endf
 
 " insert模式下 Ctrl+d 删除整行
@@ -349,7 +349,7 @@ let s:vim_tags = expand('~/.cache/tags')
 let g:gutentags_cache_dir = s:vim_tags
 " 检测 ~/.cache/tags 不存在就新建 "
 if !isdirectory(s:vim_tags)
-   silent! call mkdir(s:vim_tags, 'p')
+  silent! call mkdir(s:vim_tags, 'p')
 endif
 
 " 配置 ctags 的参数 "
